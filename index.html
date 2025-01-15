@@ -3,205 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mystery Meal Planner</title>
+    <title>Teletato</title>
     <style>
         body {
             margin: 0;
-            font-family: 'Arial', sans-serif;
-            background: #f5f5f5;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #f7e7d3, #deb887); /* Potato-themed background */
             color: #333;
-            text-align: center;
         }
         header {
-            background-color: #ff8c00;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            text-align: center;
+            background: #8B4513;
             color: white;
-            padding: 20px;
-            font-size: 1.5em;
+            padding: 10px 0;
+            font-size: 2em;
             font-weight: bold;
-        }
-        #main-container {
-            margin: 20px auto;
-            max-width: 800px;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
+            z-index: 100;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .ingredients-input {
-            margin-bottom: 20px;
-        }
-        input[type="text"] {
-            width: 70%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1em;
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            background: #ff8c00;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background: #e57800;
-        }
-        .recipe-card {
-            margin-top: 20px;
-            padding: 20px;
-            background: #fdfdfd;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            text-align: left;
-        }
-        .recipe-card h3 {
-            margin-top: 0;
-            color: #ff8c00;
-        }
-        .recipe-card ul {
-            padding-left: 20px;
-        }
-        #wheel {
-            margin: 20px auto;
-            width: 300px;
-            height: 300px;
-            border: 10px solid #ff8c00;
-            border-radius: 50%;
+        .teleport-zone {
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2em;
-            background: conic-gradient(
-                #ffebcc 0deg 45deg,
-                #ffcc99 45deg 90deg,
-                #ffe5b4 90deg 135deg,
-                #ffdbb4 135deg 180deg,
-                #ffebcc 180deg 225deg,
-                #ffcc99 225deg 270deg,
-                #ffe5b4 270deg 315deg,
-                #ffdbb4 315deg 360deg
-            );
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
-        #wheel span {
+        .potato {
             position: absolute;
+            width: 100px; /* Potato size */
+            height: auto;
+            transition: transform 0.3s ease-out, opacity 0.2s ease-in-out;
         }
     </style>
 </head>
 <body>
-    <header>
-        Mystery Meal Planner
-    </header>
-    <div id="main-container">
-        <div class="ingredients-input">
-            <h2>What's in your kitchen?</h2>
-            <input type="text" id="ingredientInput" placeholder="Enter an ingredient and press Add">
-            <button onclick="addIngredient()">Add</button>
-        </div>
-        <div>
-            <h3>Your Ingredients:</h3>
-            <ul id="ingredientList"></ul>
-            <button onclick="getRandomRecipe()">Get a Mystery Meal</button>
-        </div>
-        <h2>Or Spin the Wheel for a Random Recipe!</h2>
-        <div id="wheel">
-            <span id="recipeName">Spin Me!</span>
-        </div>
-        <button onclick="spinTheWheel()">Spin the Wheel</button>
-        <div id="recipeResult"></div>
-    </div>
+    <header>Teletato</header>
+    <div class="teleport-zone" id="teleportZone"></div>
 
     <script>
-        const recipes = [
-            { name: "Spaghetti Bolognese", ingredients: ["spaghetti", "beef", "tomato", "garlic", "onion"] },
-            { name: "Chicken Curry", ingredients: ["chicken", "curry paste", "coconut milk", "onion", "garlic"] },
-            { name: "Vegetable Stir-fry", ingredients: ["broccoli", "carrot", "bell pepper", "soy sauce", "ginger"] },
-            { name: "Beef Tacos", ingredients: ["taco shells", "beef", "lettuce", "tomato", "cheese"] },
-            { name: "Caprese Salad", ingredients: ["tomato", "mozzarella", "basil", "olive oil"] },
-            { name: "Chicken Caesar Salad", ingredients: ["chicken", "lettuce", "croutons", "parmesan", "Caesar dressing"] },
-            { name: "Mushroom Risotto", ingredients: ["rice", "mushrooms", "parmesan", "white wine", "garlic"] },
-            { name: "BBQ Chicken Pizza", ingredients: ["pizza base", "chicken", "BBQ sauce", "cheese", "onion"] },
-            { name: "Egg Fried Rice", ingredients: ["rice", "egg", "peas", "carrot", "soy sauce"] },
-            { name: "Tomato Soup", ingredients: ["tomato", "onion", "garlic", "cream", "basil"] },
-            // Add 40 more recipes here
-        ];
+        const teleportZone = document.getElementById('teleportZone');
+        const potatoUrl = "https://i5.walmartimages.com/seo/Russet-Baking-Potatoes-Whole-Fresh-Each_c638c006-a982-48f7-aa33-6d3a8dc2983c.8fd015937ebfdd46c8fcb6177d0d1b1d.jpeg";
 
-        const selectedIngredients = [];
+        // Function to create and teleport a potato
+        function createTeleportingPotato() {
+            const potato = document.createElement('img');
+            potato.src = potatoUrl;
+            potato.className = 'potato';
 
-        function addIngredient() {
-            const ingredientInput = document.getElementById("ingredientInput");
-            const ingredient = ingredientInput.value.trim().toLowerCase();
-            if (ingredient && !selectedIngredients.includes(ingredient)) {
-                selectedIngredients.push(ingredient);
-                updateIngredientList();
-            }
-            ingredientInput.value = '';
-        }
+            // Initial random position
+            potato.style.left = `${Math.random() * 100}%`;
+            potato.style.top = `${Math.random() * 100}%`;
 
-        function updateIngredientList() {
-            const ingredientList = document.getElementById("ingredientList");
-            ingredientList.innerHTML = '';
-            selectedIngredients.forEach(ingredient => {
-                const li = document.createElement("li");
-                li.textContent = ingredient;
-                ingredientList.appendChild(li);
-            });
-        }
+            teleportZone.appendChild(potato);
 
-        function getRandomRecipe() {
-            const recipeResult = document.getElementById("recipeResult");
-            const matchingRecipes = recipes.filter(recipe =>
-                recipe.ingredients.some(ingredient => selectedIngredients.includes(ingredient))
-            );
-
-            if (matchingRecipes.length === 0) {
-                recipeResult.innerHTML = `<p>Sorry, no recipes match your ingredients. Try adding more!</p>`;
-                return;
+            // Function to teleport the potato
+            function teleport() {
+                potato.style.transform = `translate(${Math.random() * 100 - 50}vw, ${Math.random() * 100 - 50}vh)`;
+                potato.style.opacity = 0.5 + Math.random() * 0.5; // Randomize opacity for fun
             }
 
-            const randomRecipe = matchingRecipes[Math.floor(Math.random() * matchingRecipes.length)];
-            recipeResult.innerHTML = `
-                <div class="recipe-card">
-                    <h3>${randomRecipe.name}</h3>
-                    <p><strong>Ingredients:</strong></p>
-                    <ul>${randomRecipe.ingredients.map(ing => `<li>${ing}</li>`).join('')}</ul>
-                </div>
-            `;
+            // Start teleporting every second
+            setInterval(teleport, 1000);
         }
 
-        function spinTheWheel() {
-            const wheel = document.getElementById("wheel");
-            const recipeName = document.getElementById("recipeName");
-            const randomRecipe = recipes[Math.floor(Math.random() * recipes.length)];
-
-            let rotation = 0;
-            const interval = setInterval(() => {
-                rotation += 10;
-                wheel.style.transform = `rotate(${rotation}deg)`;
-                if (rotation >= 720) {
-                    clearInterval(interval);
-                    recipeName.textContent = randomRecipe.name;
-                    showRecipe(randomRecipe);
-                }
-            }, 20);
-        }
-
-        function showRecipe(recipe) {
-            const recipeResult = document.getElementById("recipeResult");
-            recipeResult.innerHTML = `
-                <div class="recipe-card">
-                    <h3>${recipe.name}</h3>
-                    <p><strong>Ingredients:</strong></p>
-                    <ul>${recipe.ingredients.map(ing => `<li>${ing}</li>`).join('')}</ul>
-                </div>
-            `;
-        }
+        // Spawn potatoes endlessly
+        setInterval(createTeleportingPotato, 500); // New potato every 500ms
     </script>
 </body>
 </html>
